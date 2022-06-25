@@ -23,11 +23,6 @@ fn main()
     player_char.name, player_char.health, player_char.attack, player_char.defense);
 
     battle(&mut player_char, &mut valnir_reaper);
-
-    //test_function(&mut player_char);
-
-    //println!("New values?\nName: {}\nHealth: {}\nAttack: {}\nDefense: {}",
-    //player_char.name, player_char.health, player_char.attack, player_char.defense);
 }
 
 fn create_character() -> Character
@@ -118,43 +113,37 @@ fn create_character() -> Character
         {
             output_character.health = temp_health_points;
             output_character.defense = temp_defense_points;
-            //print something
-            // return character
         }
 
-        let mut confirm = String::new();
-        println!("Your health is {}\nYour attack is {}\nYour defense is {}\n-> Do you confirm this, or would you like to \
-        insert new values? Press 1 to confirm or 0 to start again and insert new values:", output_character.health,
-        output_character.attack, output_character.defense);
-        io::stdin().read_line(&mut confirm).expect("Failed to read input.");
-        let mut confirm:i8 = confirm.trim().parse().expect("Failed to convert to integer.");
-
-        if confirm == 1
+        loop
         {
-            println!("Your character is now ready to do battle!\n===========\nHere is your character's information:\
-            \n===========\n-> Your character's name is {}\n-> Your character's health points are {}\n-> Your \
-            character's attack is {}\n-> The defense is {}", output_character.name, output_character.health,
+            let mut confirm = String::new();
+            println!("Your health is {}\nYour attack is {}\nYour defense is {}\n-> Do you confirm this, or would you like to \
+            insert new values? Press 1 to confirm or 0 to start again and insert new values:", output_character.health,
             output_character.attack, output_character.defense);
-
-            return output_character;
-        } else if confirm == 0
-        {
-            println!("Then let's start over!")
+            io::stdin().read_line(&mut confirm).expect("Failed to read input.");
+            let mut confirm:i8 = confirm.trim().parse().expect("Failed to convert to integer.");
+    
+            if confirm == 1
+            {
+                println!("Your character is now ready to do battle!\n===========\nHere is your character's information:\
+                \n===========\n-> Your character's name is {}\n-> Your character's health points are {}\n-> Your \
+                character's attack is {}\n-> The defense is {}", output_character.name, output_character.health,
+                output_character.attack, output_character.defense);
+    
+                return output_character;
+            } else if confirm == 0
+            {
+                println!("Then let's start over!");
+                break;
+            } else
+            {
+                println!("Please insert a valid answer.");
+            }
         }
 
     }
 }
-
-fn test_function(mut struct_param: &mut Character)
-{
-    //let new_attack:i8 = struct_param.attack - 5;
-    //let new_defense:i8 = struct_param.defense - 3;
-    struct_param.attack -= 5;
-    struct_param.defense -= 3;
-}
-
-// When writing the battle() function, make sure to put the parameters like in the test_function,
-// since we want the player and the enemy to be modified after the battle is over
 
 fn result_attack_defense(attack_param: i8, defense_param: i8) -> i8
 {
@@ -171,7 +160,6 @@ fn battle(mut player_param: &mut Character, mut enemy_param: &mut Character)
 {
     let mut continue_number = String::new();
     let mut turn_number:i32 = 0;
-    //let mut battle_over:bool = false;
 
     println!("You are doing battle against {}! Let us see if you can win this \
     fight!\n===========\n(Press any number to continue)", enemy_param.name);
@@ -179,7 +167,6 @@ fn battle(mut player_param: &mut Character, mut enemy_param: &mut Character)
     let mut continue_number:i8 = continue_number.trim().parse().expect("Failed to convert to integer.");
 
     println!("You start attacking!\n===========\n");
-    //while battle_over == false
     loop
     {
         let mut continue_number = String::new();
@@ -245,5 +232,4 @@ fn battle(mut player_param: &mut Character, mut enemy_param: &mut Character)
             }
         }
     }
-
 }
