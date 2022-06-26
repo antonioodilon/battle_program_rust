@@ -4,8 +4,16 @@ struct Character
 {
     name: String,
     health: i16,
-    attack: i8,
-    defense: i8,
+    attack: i16,
+    defense: i16,
+}
+
+impl Character
+{
+    fn temporary_buff(&mut self, buff_param: i16, attribute_param: i16) -> i16
+    {
+            buff_param * attribute_param
+    }
 }
 
 fn main()
@@ -47,9 +55,9 @@ fn create_character() -> Character
 
     loop
     {
-        let mut remaining_points:i8 = 50;
-        let temp_defense_points:i8 = 10;
-        let temp_attack_points:i8 = 10;
+        let mut remaining_points:i16 = 50;
+        let temp_defense_points:i16 = 10;
+        let temp_attack_points:i16 = 10;
         let temp_health_points:i16 = 50;
 
         println!("Now it's time to put points in your character!\n===========\nYou have {} points to distribute across your \
@@ -66,7 +74,7 @@ fn create_character() -> Character
             println!("===========\nHow many points will you put into your character's attack?");
             let mut attack_character = String::new();
             io::stdin().read_line(&mut attack_character).expect("Failed to get attack input.");
-            let mut attack_character:i8 = attack_character.trim().parse().expect("Failed to convert to integer.");
+            let mut attack_character:i16 = attack_character.trim().parse().expect("Failed to convert to integer.");
 
             if (attack_character > remaining_points) || (attack_character < 0)
             {
@@ -90,7 +98,7 @@ fn create_character() -> Character
                 like to put on your defense?", remaining_points);
                 let mut defense_character = String::new();
                 io::stdin().read_line(&mut defense_character).expect("Failed to get attack input.");
-                let mut defense_character:i8 = defense_character.trim().parse().expect("Failed to convert to integer.");
+                let mut defense_character:i16 = defense_character.trim().parse().expect("Failed to convert to integer.");
 
                 if (defense_character > remaining_points) || (defense_character < 0)
                 {
@@ -114,6 +122,7 @@ fn create_character() -> Character
             output_character.health = temp_health_points;
             output_character.defense = temp_defense_points;
         }
+
 
         loop
         {
@@ -141,11 +150,10 @@ fn create_character() -> Character
                 println!("Please insert a valid answer.");
             }
         }
-
     }
 }
 
-fn result_attack_defense(attack_param: i8, defense_param: i8) -> i8
+fn result_attack_defense(attack_param: i16, defense_param: i16) -> i16
 {
     if attack_param - defense_param > 0
     {
@@ -160,6 +168,9 @@ fn battle(mut player_param: &mut Character, mut enemy_param: &mut Character)
 {
     let mut continue_number = String::new();
     let mut turn_number:i32 = 0;
+    let enemy_init_attack = enemy_param.attack;
+    let player_init_attack = player_param.attack;
+    let buff_number:i16 = 2;
 
     println!("You are doing battle against {}! Let us see if you can win this \
     fight!\n===========\n(Press any number to continue)", enemy_param.name);
@@ -167,6 +178,7 @@ fn battle(mut player_param: &mut Character, mut enemy_param: &mut Character)
     let mut continue_number:i8 = continue_number.trim().parse().expect("Failed to convert to integer.");
 
     println!("You start attacking!\n===========\n");
+
     loop
     {
         let mut continue_number = String::new();
@@ -175,11 +187,31 @@ fn battle(mut player_param: &mut Character, mut enemy_param: &mut Character)
         // In the future I intend to modify this, so that the attack and defense values are random within a certain
         // range
 
-        let mut damage_against_enemy:i8 = result_attack_defense(player_param.attack , enemy_param.defense);
-        let mut damage_against_player:i8 = result_attack_defense(enemy_param.attack, player_param.defense);
-
         turn_number += 1;
         println!("======This is turn number {}!======", turn_number);
+
+        if turn_number >= 5 && turn_number <= 10
+        {
+            println!("{} now has a buff of {}!", enemy_param.name, buff_number);
+            enemy_param.attack = enemy_param.temporary_buff(buff_number, enemy_param.attack);
+            println!("Now his attack is {}! Will you be able to defeat him now...?", enemy_param.attack);
+
+            if turn_number >= 7
+            {
+                println!("The Gods favor you! Now YOU also have acquired a buff of {} in your attack!", buff_number);
+                player_param.attack = player_param.temporary_buff(buff_number, player_param.attack);
+                println!("Now your mighty attack is {}!", player_param.attack);
+            }
+        } else if turn_number == 11
+        {
+            enemy_param.attack = enemy_init_attack;
+            player_param.attack = player_init_attack;
+            println!("{}'s buff has worn out and his attack went back to being {}", enemy_param.name, enemy_param.attack);
+            println!("Your buff also has worn out! Your attack is now back to being {}", player_param.attack);
+        }
+
+        let mut damage_against_enemy:i16 = result_attack_defense(player_param.attack , enemy_param.defense);
+        let mut damage_against_player:i16 = result_attack_defense(enemy_param.attack, player_param.defense);
 
         println!("Press any number to attack the enemy!");
         io::stdin().read_line(&mut continue_number).expect("Failed to read input.");
@@ -193,8 +225,7 @@ fn battle(mut player_param: &mut Character, mut enemy_param: &mut Character)
         } else
         {
             println!("-> You have dealt {} points of damage against {}!", damage_against_enemy, enemy_param.name);
-            enemy_param.health -= damage_against_enemy as i16;
-            //println!("Your opponent now has {} points of health!", enemy_param.health);
+            enemy_param.health -= damage_against_enemy;
 
             if enemy_param.health <= 0
             {
@@ -215,9 +246,8 @@ fn battle(mut player_param: &mut Character, mut enemy_param: &mut Character)
             println!("-> Ha! Your armor is indeed strong! It has fully blocked the enemy's attack!");
         } else
         {
-            println!("-> {} has dealt {} points of damage against you!", player_param.name, damage_against_player);
-            player_param.health -= damage_against_player as i16;
-            //println!("You now have {} points of health!", player_param.health);
+            println!("-> {} has dealt {} points of damage against you!", enemy_param.name, damage_against_player);
+            player_param.health -= damage_against_player;
 
             if player_param.health <= 0
             {
@@ -231,5 +261,8 @@ fn battle(mut player_param: &mut Character, mut enemy_param: &mut Character)
                 println!("\n===========\nNow the enemy prepares for your attack!\n===========\n");
             }
         }
+
+        enemy_param.attack = enemy_init_attack;
+        player_param.attack = player_init_attack;
     }
 }
